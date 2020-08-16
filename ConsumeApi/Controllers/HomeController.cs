@@ -7,6 +7,9 @@ using ConsumeApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace ConsumeApi.Controllers
 {
@@ -59,7 +62,7 @@ namespace ConsumeApi.Controllers
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Add("Key", "Secret@123");
-                StringContent content = new StringContent(JsonConvert.SerializeObject(reservation), Encoding.UTF8, "application/json");
+                StringContent content = new StringContent(ConvertObjectToXMLString(reservation), Encoding.UTF8, "application/xml");
 
                 using (var response = await httpClient.PostAsync("http://localhost:8888/api/Reservation", content))
                 {
@@ -157,6 +160,41 @@ namespace ConsumeApi.Controllers
                 }
             }
             return RedirectToAction("Index");
+        }
+
+        public ViewResult AddFile() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> AddFile(IFormFile file)
+        {
+            string apiResponse = "";
+            using (var httpClient = new HttpClient())
+            {
+                var form = new MultipartFormDataContent();
+                using (var fileStream = file.OpenReadStream())
+                {
+                    form.Add(new StreamContent(fileStream), "file", file.FileName);
+                    using (var response = await httpClient.PostAsync("http://localhost:8888/api/Reservation/UploadFile", form))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        apiResponse = await response.Content.ReadAsStringAsync();
+                    }
+                }
+            }
+            return View((object)apiResponse);
+        }
+
+        string ConvertObjectToXMLString(object classObject)
+        {
+            string xmlString = null;
+            XmlSerializer xmlSerializer = new XmlSerializer(classObject.GetType());
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(memoryStream, classObject);
+                memoryStream.Position = 0;
+                xmlString = new StreamReader(memoryStream).ReadToEnd();
+            }
+            return xmlString;
         }
     }
 }
