@@ -125,21 +125,16 @@ namespace ConsumeApi.Controllers
         public async Task<IActionResult> UpdateReservationPatch(int id, Reservation reservation)
         {
             _logger.LogInformation("In UpdateReservationPatch + id + reservation");
-            _logger.LogInformation(reservation.Name);
-            _logger.LogInformation(id.ToString());
 
             using (var httpClient = new HttpClient())
-            {
+            { 
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri("http://localhost:8888/api/Reservation/" + id),
                     Method = new HttpMethod("Patch"),
                     Content = new StringContent("[{ \"op\": \"replace\", \"path\": \"Name\", \"value\": \"" + reservation.Name + "\"},{ \"op\": \"replace\", \"path\": \"StartLocation\", \"value\": \"" + reservation.StartLocation + "\"}]", Encoding.UTF8, "application/json")
                 };
-                //_logger.LogInformation(request.ToString());
-
                 var response = await httpClient.SendAsync(request);
-                _logger.LogInformation(response.ToString());
             }
             return RedirectToAction("Index");
         }
