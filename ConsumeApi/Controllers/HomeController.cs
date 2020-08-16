@@ -58,12 +58,19 @@ namespace ConsumeApi.Controllers
             Reservation receivedReservation = new Reservation();
             using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Add("Key", "Secret@123");
                 StringContent content = new StringContent(JsonConvert.SerializeObject(reservation), Encoding.UTF8, "application/json");
 
                 using (var response = await httpClient.PostAsync("http://localhost:8888/api/Reservation", content))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                        receivedReservation = JsonConvert.DeserializeObject<Reservation>(apiResponse);
+                    else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        ViewBag.Result = apiResponse;
+                        return View();
+                    } 
                 }
             }
             return View(receivedReservation);
@@ -135,6 +142,19 @@ namespace ConsumeApi.Controllers
                     Content = new StringContent("[{ \"op\": \"replace\", \"path\": \"Name\", \"value\": \"" + reservation.Name + "\"},{ \"op\": \"replace\", \"path\": \"StartLocation\", \"value\": \"" + reservation.StartLocation + "\"}]", Encoding.UTF8, "application/json")
                 };
                 var response = await httpClient.SendAsync(request);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteReservation(int ReservationId)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.DeleteAsync("http://localhost:8888/api/Reservation/" + ReservationId))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                }
             }
             return RedirectToAction("Index");
         }

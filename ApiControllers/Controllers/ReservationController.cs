@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 
 namespace ApiControllers.Controllers
 {
@@ -30,15 +31,19 @@ namespace ApiControllers.Controllers
         public Reservation Get(int id) => repository[id];
 
         [HttpPost]
-        public Reservation Post([FromBody] Reservation res)
+        public IActionResult Post([FromBody] Reservation res)
         {
             _logger.LogInformation("Post reservation from body");
-            return repository.AddReservation(new Reservation
+            if (!Authenticate())
+            {
+                return Unauthorized();
+            }
+            return Ok(repository.AddReservation(new Reservation
             {
                 Name = res.Name,
                 StartLocation = res.StartLocation,
                 EndLocation = res.EndLocation
-            });
+            }));
         }
 
         [HttpPut]
@@ -60,5 +65,13 @@ namespace ApiControllers.Controllers
 
         [HttpDelete("{id}")]
         public void Delete(int id) => repository.DeleteReservation(id);
+
+        bool Authenticate()
+        {
+            var allowedKeys = new[] { "Secret@123", "Secret#12", "SecretABC" };
+            StringValues key = Request.Headers["Key"];
+            int count = (from t in allowedKeys where t == key select t).Count();
+            return count == 0 ? false : true;
+        }
     }
 }
