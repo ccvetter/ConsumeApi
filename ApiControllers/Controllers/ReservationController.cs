@@ -31,10 +31,9 @@ namespace ApiControllers.Controllers
         }
 
         [HttpGet]
-        [Produces("application/xml")]
+        //[Produces("application/xml")]
         public IEnumerable<Reservation> Get()
         {
-            //repository.Reservations;
             Authenticate();
             return repository.Reservations;
         }

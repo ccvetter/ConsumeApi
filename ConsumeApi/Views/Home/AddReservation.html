@@ -1,0 +1,58 @@
+﻿<div class="form-group">
+    <label for="Name">Name:</label>
+    <input type="text" class="form-control" id="Name" />
+</div>
+<div class="form-group">
+    <label for="StartLocation">Start Location:</label>
+    <input type="text" class="form-control" id="StartLocation" />
+</div>
+<div class="form-group">
+    <label for="EndLocation">End Location:</label>
+    <input type="text" class="form-control" id="EndLocation" />
+</div>
+<div class="text-center panel-body">
+    <button type="submit" class="btn btn-sm btn-primary" id="AddButton">Add</button>
+</div>
+
+<div style="display:none" id="resultDiv">    
+    <h2>Reservation</h2>
+    <table class="table table-sm table-striped table-bordered m-2">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Start Location</th>
+                <th>End Location</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $("#AddButton").click(function (e) {
+        $.ajax({
+            url: "http://localhost:8888/api/Reservation",
+            headers: {
+                Key: "Secret@123"
+            },
+            type: "post",
+            contentType: "application/json",
+            data: JSON.stringify({
+                Id: 0,
+                Name: $("#Name").val(),
+                StartLocation: $("StartLocation").val(),
+                EndLocation: $("#EndLocation").val()
+            }),
+            success: function (result, status, xhr) {
+                var str = "<tr><td>" + result["id"] + "</td><td>" + result["name"] + "</td><td>" + result["startLocation"] + "</td><td>" + result["endLocation"] + "</td></tr>"
+                $("table tbody").append(str);
+                $("#resultDiv").show();
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr)
+            }
+        });
+    });
+</script>

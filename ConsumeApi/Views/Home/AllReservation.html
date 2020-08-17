@@ -14,27 +14,31 @@
 
 <script>
     $(document).read(function () {
-        $("table tbody").html("");
-        $.ajax({
-            url: "http://localhost:8888/api/Reservation",
-            type: "get",
-            contentType: "application/json",
-            success: function (result, status, xhr) {
-                $.each(result, function (index, value) {
-                    $("tbody").append($("<tr>"));
-                    appendElement = $("tbody tr").last();
-                    appendElement.append($("<td>").html(value["id"]));
-                    appendElement.append($("<td>").html(value["name"]));
-                    appendElement.append($("<td>").html(value["startLocation"]));
-                    appendElement.append($("<td>").html(value["endLocation"]));
-                    appendElement.append($("<td>").html("<a href=\"UpdateReservation.html?id=" + value["id"] + "\"><img src=\"icon/edit.png\" /></a>"));
-                    appendElement.append($("<td>").html("<img class=\"delete\" src=\"icon/delete.png\" />"));
-                });
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr);
-            }
-        });
+        ShowAllReservation();
+
+        function ShowAllReservation() {
+            $("table tbody").html("");
+            $.ajax({
+                url: "http://localhost:8888/api/Reservation",
+                type: "get",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    $.each(result, function (index, value) {
+                        $("tbody").append($("<tr>"));
+                        appendElement = $("tbody tr").last();
+                        appendElement.append($("<td>").html(value["id"]));
+                        appendElement.append($("<td>").html(value["name"]));
+                        appendElement.append($("<td>").html(value["startLocation"]));
+                        appendElement.append($("<td>").html(value["endLocation"]));
+                        appendElement.append($("<td>").html("<a href=\"UpdateReservation.html?id=" + value["id"] + "\"><img src=\"icon/edit.png\" /></a>"));
+                        appendElement.append($("<td>").html("<img class=\"delete\" src=\"icon/delete.png\" />"));
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        }
     
          $("table").on("click", "img.delete", function () {
             var reservationId = $(this).parents("tr").find("td:nth-child(1)").text();
